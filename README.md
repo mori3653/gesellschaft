@@ -1,4 +1,4 @@
-# 림버스 덱 빌더
+# 게젤샤프트
 
 림버스 컴퍼니 덱 빌더 + 전 인격 스킬셋/서포트 패시브 검색 도구.
 
@@ -8,4 +8,4 @@
 - 키워드 툴팁 및 아이콘
 - 보유 인격/에고 관리 (localStorage 기반)
 
-GitHub Pages: https://mori3653.github.io/limbus-passive-finder/
+GitHub Pages: https://mori3653.github.io/gesellschaft/
