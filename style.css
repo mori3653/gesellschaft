@@ -110,6 +110,16 @@
   .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
   .brand{ display:flex; align-items:center; gap:10px; }
   .brand-mascot{ height:44px; width:auto; display:block; flex:none; }
+
+  /* ---------- corner mascot ---------- */
+  .mascot-corner{
+    position:fixed; right:0; bottom:0; height:240px; width:auto;
+    pointer-events:none; z-index:1; user-select:none;
+    filter:drop-shadow(0 6px 16px rgba(0,0,0,0.28));
+  }
+  @media (max-width:1400px){
+    .mascot-corner{ display:none; }
+  }
   .owned-controls{ display:flex; align-items:center; gap:14px; margin-left:auto; }
   .owned-only-toggle{ margin-bottom:0; white-space:nowrap; }
   h1{
