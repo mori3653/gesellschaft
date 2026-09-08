@@ -108,6 +108,8 @@
     display:flex; flex-direction:column; gap:14px;
   }
   .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mascot{ height:44px; width:auto; display:block; flex:none; }
   .owned-controls{ display:flex; align-items:center; gap:14px; margin-left:auto; }
   .owned-only-toggle{ margin-bottom:0; white-space:nowrap; }
   h1{
