@@ -118,16 +118,23 @@
 
   .mascot-corner{
     display:none;
-    position:fixed; right:0; bottom:0; height:240px; width:auto;
+    position:fixed; height:240px; width:auto;
     pointer-events:none; z-index:1; user-select:none;
     filter:drop-shadow(0 6px 16px rgba(0,0,0,0.28));
   }
+  .mascot-br{ right:0; bottom:0; }
+  .mascot-bl{ left:0; bottom:0; height:260px; }
+  .mascot-tr{ right:0; top:var(--header-h, 96px); height:260px; }
+  .mascot-tl{ left:0; top:var(--header-h, 96px); height:230px; }
+
+  /* 1~2단계: 덱 빌더 메인 화면(넓은 화면, 편성 창 닫힘)에서 우측 하단 하나만 */
   @media (min-width:1400px){
-    body[data-fau-level="1"]:has(#tabDeck[aria-pressed="true"]) .mascot-corner,
-    body[data-fau-level="2"]:has(#tabDeck[aria-pressed="true"]) .mascot-corner{ display:block; }
-    body[data-fau-level="1"]:has(#pickerView:not([hidden])) .mascot-corner,
-    body[data-fau-level="2"]:has(#pickerView:not([hidden])) .mascot-corner{ display:none; }
+    body[data-fau-level="1"]:has(#tabDeck[aria-pressed="true"]) .mascot-br,
+    body[data-fau-level="2"]:has(#tabDeck[aria-pressed="true"]) .mascot-br{ display:block; }
+    body[data-fau-level="1"]:has(#pickerView:not([hidden])) .mascot-br,
+    body[data-fau-level="2"]:has(#pickerView:not([hidden])) .mascot-br{ display:none; }
   }
+  /* 3단계: 네 모퉁이 전부, 화면/탭 상관없이 항상 */
   body[data-fau-level="3"] .mascot-corner{ display:block; }
 
   /* ---------- 설정 메뉴 ---------- */
