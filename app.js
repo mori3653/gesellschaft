@@ -4889,7 +4889,7 @@ document.getElementById("deckResetAll").addEventListener("click", () => {
 const pickerView = document.getElementById("pickerView");
 function openPicker(sinner){
   deckState.picker = { sinner, tab: "identity", q: "", rarities: new Set(), sins: new Set(), activations: new Set(), identityKw: new Set(), cats: new Set() };
-  document.getElementById("pickerTitle").textContent = `${sinner} 인격 선택`;
+  document.getElementById("pickerTitle").textContent = `${sinner} 편성`;
   document.getElementById("pickerSearchInput").value = "";
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
@@ -4935,7 +4935,7 @@ function trySwitchPickerSinner(sinner){
   deckState.picker.sinner = sinner;
   deckState.picker.q = "";
   document.getElementById("pickerSearchInput").value = "";
-  document.getElementById("pickerTitle").textContent = `${sinner} 인격 선택`;
+  document.getElementById("pickerTitle").textContent = `${sinner} 편성`;
   renderPickerSinnerSwitch();
   setPickerTab(keepTab, true);
   renderPicker();
