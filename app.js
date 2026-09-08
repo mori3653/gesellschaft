@@ -5310,7 +5310,38 @@ function closeOwnedView(){
   else showSearchView();
   renderBoth();
 }
-document.getElementById("ownedSettingsBtn").addEventListener("click", openOwnedView);
+const settingsMenu = document.querySelector(".settings-menu");
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsPanel = document.getElementById("settingsPanel");
+function closeSettingsPanel(){ settingsPanel.hidden = true; }
+settingsBtn.addEventListener("click", () => { settingsPanel.hidden = !settingsPanel.hidden; });
+document.addEventListener("click", e => {
+  if (!settingsPanel.hidden && !settingsMenu.contains(e.target)) closeSettingsPanel();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !settingsPanel.hidden) closeSettingsPanel(); });
+
+const FAU_LEVEL_KEY = "gesellschaft_fau_level";
+const FAU_LEVEL_LABELS = ["파우스트", "순진한 파우스트", "멍청한 파우스트", "파우웅!"];
+const fauLevelSlider = document.getElementById("fauLevelSlider");
+const fauLevelLabel = document.getElementById("fauLevelLabel");
+function applyFauLevel(level){
+  document.body.dataset.fauLevel = level;
+  fauLevelLabel.textContent = FAU_LEVEL_LABELS[level];
+}
+let savedFauLevel = 1;
+try {
+  const raw = localStorage.getItem(FAU_LEVEL_KEY);
+  if (raw !== null) savedFauLevel = Math.min(3, Math.max(0, parseInt(raw, 10) || 0));
+} catch(e){}
+fauLevelSlider.value = savedFauLevel;
+applyFauLevel(savedFauLevel);
+fauLevelSlider.addEventListener("input", e => {
+  const level = parseInt(e.target.value, 10);
+  applyFauLevel(level);
+  try { localStorage.setItem(FAU_LEVEL_KEY, String(level)); } catch(e){}
+});
+
+document.getElementById("ownedSettingsBtn").addEventListener("click", () => { closeSettingsPanel(); openOwnedView(); });
 document.getElementById("ownedBack").addEventListener("click", closeOwnedView);
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !ownedView.hidden) closeOwnedView(); });
 document.getElementById("ownedOnlyToggle").addEventListener("change", e => {
