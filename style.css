@@ -137,18 +137,13 @@
   /* 3단계: 네 모퉁이 전부, 화면/탭 상관없이 항상 */
   body[data-fau-level="3"] .mascot-corner{ display:block; }
 
-  /* ---------- 설정 메뉴 ---------- */
+  /* ---------- 설정 메뉴 (팝업 모달) ---------- */
   .settings-menu{ position:relative; margin-left:auto; }
-  .settings-panel{
-    position:absolute; top:calc(100% + 8px); right:0; z-index:30;
-    display:flex; flex-direction:column; gap:12px;
-    min-width:230px; padding:14px;
-    background:var(--surface); border:1px solid var(--border-strong);
-    border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,0.18);
-  }
-  .settings-panel .owned-only-toggle{ margin-bottom:0; white-space:nowrap; }
-  .settings-panel .settings-owned-btn{ width:100%; }
-  .fau-slider-block{ display:flex; flex-direction:column; gap:6px; padding-top:4px; border-top:1px solid var(--border); }
+  .settings-modal-panel{ max-width:340px; }
+  .settings-modal-body{ display:flex; flex-direction:column; gap:12px; }
+  .settings-modal-body .owned-only-toggle{ margin-bottom:0; white-space:nowrap; }
+  .settings-modal-body .settings-owned-btn{ width:100%; }
+  .fau-slider-block{ display:flex; flex-direction:column; gap:6px; padding-top:8px; border-top:1px solid var(--border); }
   .fau-slider-label{ font-size:12px; color:var(--text-muted); text-align:center; font-weight:600; }
   .fau-slider-block input[type="range"]{ width:100%; accent-color:var(--accent); }
   h1{

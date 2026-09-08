@@ -5310,15 +5310,13 @@ function closeOwnedView(){
   else showSearchView();
   renderBoth();
 }
-const settingsMenu = document.querySelector(".settings-menu");
 const settingsBtn = document.getElementById("settingsBtn");
-const settingsPanel = document.getElementById("settingsPanel");
-function closeSettingsPanel(){ settingsPanel.hidden = true; }
-settingsBtn.addEventListener("click", () => { settingsPanel.hidden = !settingsPanel.hidden; });
-document.addEventListener("click", e => {
-  if (!settingsPanel.hidden && !settingsMenu.contains(e.target)) closeSettingsPanel();
-});
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !settingsPanel.hidden) closeSettingsPanel(); });
+const settingsModal = document.getElementById("settingsModal");
+function closeSettingsPanel(){ settingsModal.hidden = true; }
+settingsBtn.addEventListener("click", () => { settingsModal.hidden = false; });
+document.getElementById("settingsClose").addEventListener("click", closeSettingsPanel);
+document.getElementById("settingsBackdrop").addEventListener("click", closeSettingsPanel);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !settingsModal.hidden) closeSettingsPanel(); });
 
 const FAU_LEVEL_KEY = "gesellschaft_fau_level";
 const FAU_LEVEL_LABELS = ["파우스트", "순진한 파우스트", "멍청한 파우스트", "파우웅!"];
