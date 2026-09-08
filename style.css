@@ -111,14 +111,15 @@
   .brand{ display:flex; align-items:center; gap:10px; }
   .brand-mascot{ height:44px; width:auto; display:block; flex:none; }
 
-  /* ---------- corner mascot ---------- */
+  /* ---------- corner mascot (덱 빌더 메인 화면에서만 노출) ---------- */
   .mascot-corner{
+    display:none;
     position:fixed; right:0; bottom:0; height:240px; width:auto;
     pointer-events:none; z-index:1; user-select:none;
     filter:drop-shadow(0 6px 16px rgba(0,0,0,0.28));
   }
-  @media (max-width:1400px){
-    .mascot-corner{ display:none; }
+  @media (min-width:1400px){
+    body:has(#tabDeck[aria-pressed="true"]) .mascot-corner{ display:block; }
   }
   .owned-controls{ display:flex; align-items:center; gap:14px; margin-left:auto; }
   .owned-only-toggle{ margin-bottom:0; white-space:nowrap; }
