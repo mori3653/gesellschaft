@@ -411,6 +411,7 @@ const KEYWORD_ICON_DATA = {
   "참격": "images/keywords/attack_slash.webp",
   "관통": "images/keywords/attack_pierce.webp",
   "타격": "images/keywords/attack_blunt.webp",
+  "범용": "images/keywords/universal_faust.webp",
   "구더기": "images/keywords/21.webp",
   "저주": "images/keywords/22.webp",
   "버림": "images/keywords/24.webp",
