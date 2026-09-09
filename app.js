@@ -5471,6 +5471,7 @@ function giftCardHTML(g){
     <div class="card gift-card" data-name="${escapeHTML(g.name)}">
       <div class="card-body">
         <div class="gift-card-head">
+          ${g.icon ? `<img class="gift-card-icon" src="${g.icon}" alt="" width="36" height="36">` : ""}
           <span class="gift-rank-badge" style="background:${color}">${escapeHTML(g.rank)}</span>
           ${giftKeywordIconHTML(g.keyword, 18)}
           <span class="gift-card-name">${escapeHTML(g.name)}</span>
@@ -5502,6 +5503,7 @@ function openGiftDetail(name){
   if (!g) return;
   document.getElementById("giftDetailTitle").textContent = g.name;
   const rows = [];
+  if (g.icon) rows.push(`<div class="detail-col-icon"><img class="gift-detail-icon" src="${g.icon}" alt="" width="72" height="72"></div>`);
   rows.push(`<div class="skill-tt-row"><span>등급</span><span>${escapeHTML(g.rank)}</span></div>`);
   rows.push(`<div class="skill-tt-row"><span>키워드</span><span>${giftKeywordIconHTML(g.keyword,16)} ${escapeHTML(g.keyword)}</span></div>`);
   if (g.cost != null) rows.push(`<div class="skill-tt-row"><span>코스트</span><span>${g.cost.toLocaleString()}${g.purchasable ? "" : " (구매불가)"}</span></div>`);
