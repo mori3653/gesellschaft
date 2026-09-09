@@ -4128,7 +4128,7 @@ function skillTooltipHTML(sinner, identity, num){
   return rows.join("");
 }
 function specialSkillHTML(s, sinner, identity){
-  const iconSrc = IDENTITY_SPECIAL_SKILL_ICON_DATA[`${sinner}|${identity}`];
+  const iconSrc = (IDENTITY_SPECIAL_SKILL_ICON_DATA[`${sinner}|${identity}`] || {})[s.name];
   const tier = {skill1:1, skill2:2, skill3:3}[s.attachTo] || null;
   const rows = [`<div class="skill-tt-special-tag">특수 발동 스킬 (${escapeHTML(s.refNote)})</div>`];
   if (iconSrc) rows.push(`<div class="detail-col-icon">${skillFrameHTML(s.sin, 56, tier, iconSrc)}</div>`);
