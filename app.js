@@ -4314,7 +4314,10 @@ function egoSkillBodyHTML(slug, kind){
   const skill = EGO_SKILL_DETAIL[slug];
   const s = skill && skill[kind];
   if (!s) return `<div class="skill-tt-row"><span>정보 없음</span></div>`;
-  let html = egoSkillFormRows(s).join("");
+  const iconData = EGO_SKILL_ICON_DATA[slug];
+  const iconSrc = iconData && iconData[kind];
+  const iconHTML = iconSrc ? `<div class="detail-col-icon">${skillFrameHTML(s.sin, 72, 3, iconSrc)}</div>` : "";
+  let html = iconHTML + egoSkillFormRows(s).join("");
   if (s.alt){
     html += `<div class="ego-alt-form-block">${egoSkillFormRows(s.alt).join("")}</div>`;
   }
