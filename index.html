@@ -25,6 +25,7 @@
         <button class="view-tab" id="tabDeck" aria-pressed="true">덱 빌더</button>
         <button class="view-tab" id="tabSkillSet" aria-pressed="false">스킬셋</button>
         <button class="view-tab" id="tabSearch" aria-pressed="false">서폿패</button>
+        <button class="view-tab" id="tabGift" aria-pressed="false">기프트</button>
       </div>
       <div class="settings-menu">
         <button type="button" class="reset-all" id="settingsBtn">설정</button>
@@ -62,6 +63,18 @@
           <span id="skillSetSyncToggleLabel">동기화 후</span>
         </label>
         <button class="reset-all" id="skillSetResetAllTop">필터 초기화</button>
+      </div>
+    </div>
+    <div class="search-row" id="giftSearchRow" hidden>
+      <div class="search-box">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="giftSearchInput" type="text" placeholder="기프트 이름, 효과 키워드로 검색" autocomplete="off">
+        <button class="clear-btn" id="giftClearSearch" aria-label="검색어 지우기" title="검색어 지우기">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="reset-col">
+        <button class="reset-all" id="giftResetAll">필터 초기화</button>
       </div>
     </div>
   </div>
@@ -188,6 +201,20 @@
     <div class="empty-state" id="skillSetEmptyState" hidden>
       <span class="display">일치하는 인격이 없습니다</span>
       선택한 필터를 조정해 보세요.
+    </div>
+  </main>
+</div>
+
+<div class="layout gift-layout" id="giftView" hidden>
+  <main>
+    <div class="view-tabs mini-tabs gift-kw-tabs" role="tablist" id="giftKwTabs"></div>
+    <div class="results-head">
+      <div class="result-count"><b id="giftShownCount"></b>개 기프트 표시 중</div>
+    </div>
+    <div class="card-grid" id="giftGrid"></div>
+    <div class="empty-state" id="giftEmptyState" hidden>
+      <span class="display">일치하는 기프트가 없습니다</span>
+      검색어나 선택한 분류를 조정해 보세요.
     </div>
   </main>
 </div>
@@ -356,6 +383,18 @@
     </div>
   </div>
 </div>
+<div id="giftDetailModal" class="detail-modal" hidden>
+  <div class="detail-modal-backdrop" id="giftDetailBackdrop"></div>
+  <div class="detail-modal-panel">
+    <div class="detail-modal-header">
+      <span class="detail-modal-title" id="giftDetailTitle"></span>
+      <button type="button" class="detail-modal-close" id="giftDetailClose" aria-label="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="detail-modal-body" id="giftDetailBody"></div>
+  </div>
+</div>
 <div id="skillSetDetailModal" class="detail-modal" hidden>
   <div class="detail-modal-backdrop" id="skillSetDetailBackdrop"></div>
   <div class="detail-modal-panel">
@@ -399,6 +438,7 @@
   <img class="image-lightbox-img" id="imageLightboxImg" src="" alt="">
 </div>
 <script src="image_refs.js"></script>
+<script src="ego_gift_data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

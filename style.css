@@ -356,6 +356,38 @@
   .identity-kw-tag{ display:inline-flex; align-items:center; gap:3px; }
   .identity-kw-tag img{ width:12px; height:12px; flex:none; }
   .identity-kw-sep{ color:var(--border-strong); }
+
+  /* ---------- 에고 기프트 ---------- */
+  .gift-kw-tabs{ flex-wrap:wrap; width:auto; }
+  .gift-kw-tabs .view-tab{ display:inline-flex; align-items:center; gap:5px; }
+  .gift-kw-textbadge{
+    display:inline-block; font-size:10px; font-weight:700; color:var(--text-muted);
+    background:var(--surface-2); border:1px solid var(--border-strong);
+    border-radius:4px; padding:1px 5px; line-height:1.4;
+  }
+  .gift-card{ cursor:pointer; transition:border-color .12s; }
+  .gift-card:hover{ border-color:var(--text-faint); }
+  .gift-card-head{ display:flex; align-items:center; gap:8px; }
+  .gift-rank-badge{
+    flex:none; min-width:22px; height:22px; padding:0 5px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:6px; color:#fff; font-size:12px; font-weight:700;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .gift-card-name{ font-size:14.5px; font-weight:700; color:var(--text); overflow-wrap:anywhere; }
+  .gift-card-effect{
+    font-size:12.5px; color:var(--text-muted); line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;
+    white-space:pre-line;
+  }
+  .gift-card-foot{ display:flex; flex-wrap:wrap; gap:6px; }
+  .gift-tag{
+    font-size:10.5px; font-weight:600; color:var(--text-muted);
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:5px; padding:2px 7px;
+  }
+  .gift-tag-cost{ color:var(--accent-strong); }
+  .gift-tag-warn{ color:#c0392b; border-color:#c0392b; }
   .ego-cond-tag{
     display:inline-flex; align-items:center; gap:3px; flex-wrap:wrap;
     font-size:10px; color:var(--text-faint);
@@ -546,7 +578,8 @@
 
   /* ---------- deck builder ---------- */
   .deck-layout{ max-width:1180px; margin:0 auto; padding:22px 24px 60px; display:flex; flex-direction:column; gap:22px; }
-  #searchView[hidden], #deckView[hidden], #skillSetView[hidden], .search-row[hidden], footer.note[hidden]{ display:none !important; }
+  #searchView[hidden], #deckView[hidden], #skillSetView[hidden], #giftView[hidden], .search-row[hidden], footer.note[hidden]{ display:none !important; }
+  .gift-layout{ display:block; }
 
   /* ---------- 스킬셋 ---------- */
   .skillset-skill-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }

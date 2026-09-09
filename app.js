@@ -5352,15 +5352,19 @@ document.getElementById("ownedOnlyToggle").addEventListener("change", e => {
 });
 
 const tabSkillSet = document.getElementById("tabSkillSet");
+const tabGift = document.getElementById("tabGift");
 function showSearchView(){
   tabSearch.setAttribute("aria-pressed","true");
   tabDeck.setAttribute("aria-pressed","false");
   tabSkillSet.setAttribute("aria-pressed","false");
+  tabGift.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = false;
   document.getElementById("searchRow").hidden = false;
   document.getElementById("skillSetSearchRow").hidden = true;
+  document.getElementById("giftSearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = false;
   document.getElementById("skillSetView").hidden = true;
+  document.getElementById("giftView").hidden = true;
   document.getElementById("deckView").hidden = true;
   pickerView.hidden = true;
   ownedView.hidden = true;
@@ -5370,11 +5374,14 @@ function showSkillSetView(){
   tabSearch.setAttribute("aria-pressed","false");
   tabDeck.setAttribute("aria-pressed","false");
   tabSkillSet.setAttribute("aria-pressed","true");
+  tabGift.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
   document.getElementById("skillSetSearchRow").hidden = false;
+  document.getElementById("giftSearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = true;
   document.getElementById("skillSetView").hidden = false;
+  document.getElementById("giftView").hidden = true;
   document.getElementById("deckView").hidden = true;
   pickerView.hidden = true;
   ownedView.hidden = true;
@@ -5385,20 +5392,141 @@ function showDeckView(){
   tabSearch.setAttribute("aria-pressed","false");
   tabDeck.setAttribute("aria-pressed","true");
   tabSkillSet.setAttribute("aria-pressed","false");
+  tabGift.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
   document.getElementById("skillSetSearchRow").hidden = true;
+  document.getElementById("giftSearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = true;
   document.getElementById("skillSetView").hidden = true;
+  document.getElementById("giftView").hidden = true;
   document.getElementById("deckView").hidden = false;
   pickerView.hidden = true;
   ownedView.hidden = true;
   updateHeaderHeightVar();
   renderDeck();
 }
+function showGiftView(){
+  tabSearch.setAttribute("aria-pressed","false");
+  tabDeck.setAttribute("aria-pressed","false");
+  tabSkillSet.setAttribute("aria-pressed","false");
+  tabGift.setAttribute("aria-pressed","true");
+  document.getElementById("searchView").hidden = true;
+  document.getElementById("searchRow").hidden = true;
+  document.getElementById("skillSetSearchRow").hidden = true;
+  document.getElementById("giftSearchRow").hidden = false;
+  document.getElementById("searchFooter").hidden = true;
+  document.getElementById("skillSetView").hidden = true;
+  document.getElementById("giftView").hidden = false;
+  document.getElementById("deckView").hidden = true;
+  pickerView.hidden = true;
+  ownedView.hidden = true;
+  updateHeaderHeightVar();
+  renderGiftView();
+}
 tabSearch.addEventListener("click", showSearchView);
 tabDeck.addEventListener("click", showDeckView);
 tabSkillSet.addEventListener("click", showSkillSetView);
+tabGift.addEventListener("click", showGiftView);
+
+/* ---- 에고 기프트 ---- */
+const GIFT_KEYWORDS = ["화상","출혈","진동","파열","침잠","충전","호흡","참격","관통","타격","범용"];
+const GIFT_RANK_COLOR = {1:"#8a8f98", 2:"#3fa34d", 3:"#3b82c4", 4:"#8b5cf6", 5:"#d4a017", 6:"#c0392b"};
+const giftState = { keyword: GIFT_KEYWORDS[0] };
+
+function giftKeywordIconHTML(kw, size){
+  const src = KEYWORD_ICON_DATA[kw];
+  return src
+    ? `<img src="${src}" width="${size}" height="${size}" alt="" style="object-fit:contain;">`
+    : `<span class="gift-kw-textbadge">${escapeHTML(kw)}</span>`;
+}
+function renderGiftKwTabs(){
+  const wrap = document.getElementById("giftKwTabs");
+  wrap.innerHTML = GIFT_KEYWORDS.map(kw =>
+    `<button type="button" class="view-tab" data-kw="${escapeHTML(kw)}" aria-pressed="${kw === giftState.keyword}">${giftKeywordIconHTML(kw,15)}${escapeHTML(kw)}</button>`
+  ).join("");
+  wrap.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      giftState.keyword = btn.dataset.kw;
+      renderGiftKwTabs();
+      renderGiftGrid();
+    });
+  });
+}
+function giftMatchesQuery(g, q){
+  if (!q) return true;
+  const hay = (g.name + " " + g.effect).toLowerCase();
+  return hay.includes(q.toLowerCase());
+}
+function giftCardHTML(g){
+  const color = GIFT_RANK_COLOR[g.rankNum] || "#8a8f98";
+  const tags = [];
+  if (g.cost != null) tags.push(`<span class="gift-tag gift-tag-cost">${g.cost.toLocaleString()} 코스트</span>`);
+  if (!g.purchasable) tags.push(`<span class="gift-tag">구매불가</span>`);
+  if (g.restriction) tags.push(`<span class="gift-tag gift-tag-warn">${escapeHTML(g.restriction)}</span>`);
+  return `
+    <div class="card gift-card" data-name="${escapeHTML(g.name)}">
+      <div class="card-body">
+        <div class="gift-card-head">
+          <span class="gift-rank-badge" style="background:${color}">${escapeHTML(g.rank)}</span>
+          ${giftKeywordIconHTML(g.keyword, 18)}
+          <span class="gift-card-name">${escapeHTML(g.name)}</span>
+        </div>
+        <div class="gift-card-effect">${escapeHTML(g.effect)}</div>
+        <div class="gift-card-foot">${tags.join("")}</div>
+      </div>
+    </div>`;
+}
+function renderGiftGrid(){
+  const q = document.getElementById("giftSearchInput").value.trim();
+  const list = EGO_GIFT_DATA
+    .filter(g => g.keyword === giftState.keyword && giftMatchesQuery(g, q))
+    .sort((a,b) => a.rankNum - b.rankNum || a.name.localeCompare(b.name, "ko"));
+  document.getElementById("giftShownCount").textContent = list.length;
+  const grid = document.getElementById("giftGrid");
+  grid.innerHTML = list.map(giftCardHTML).join("");
+  document.getElementById("giftEmptyState").hidden = list.length > 0;
+  grid.querySelectorAll(".gift-card").forEach(el => {
+    el.addEventListener("click", () => openGiftDetail(el.dataset.name));
+  });
+}
+function renderGiftView(){
+  renderGiftKwTabs();
+  renderGiftGrid();
+}
+function openGiftDetail(name){
+  const g = EGO_GIFT_DATA.find(x => x.name === name);
+  if (!g) return;
+  document.getElementById("giftDetailTitle").textContent = g.name;
+  const rows = [];
+  rows.push(`<div class="skill-tt-row"><span>등급</span><span>${escapeHTML(g.rank)}</span></div>`);
+  rows.push(`<div class="skill-tt-row"><span>키워드</span><span>${giftKeywordIconHTML(g.keyword,16)} ${escapeHTML(g.keyword)}</span></div>`);
+  if (g.cost != null) rows.push(`<div class="skill-tt-row"><span>코스트</span><span>${g.cost.toLocaleString()}${g.purchasable ? "" : " (구매불가)"}</span></div>`);
+  if (g.restriction) rows.push(`<div class="skill-tt-row"><span>제한</span><span>${escapeHTML(g.restriction)}</span></div>`);
+  if (g.associated) rows.push(`<div class="skill-tt-row"><span>연관</span><span>${escapeHTML(g.associated)}</span></div>`);
+  if (g.firstAppearance) rows.push(`<div class="skill-tt-row"><span>첫 등장</span><span>${escapeHTML(g.firstAppearance)}</span></div>`);
+  if (g.upgradable) rows.push(`<div class="skill-tt-row"><span>강화</span><span>${escapeHTML(g.upgradable)}</span></div>`);
+  rows.push(`<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${linkifyKeywords(g.effect).replace(/\n/g,"<br>")}</span></div></div>`);
+  (g.extraNotes || []).forEach(n => {
+    rows.push(`<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${linkifyKeywords(n).replace(/\n/g,"<br>")}</span></div></div>`);
+  });
+  document.getElementById("giftDetailBody").innerHTML = rows.join("");
+  document.getElementById("giftDetailModal").hidden = false;
+}
+function closeGiftDetail(){ document.getElementById("giftDetailModal").hidden = true; }
+document.getElementById("giftDetailClose").addEventListener("click", closeGiftDetail);
+document.getElementById("giftDetailBackdrop").addEventListener("click", closeGiftDetail);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("giftDetailModal").hidden) closeGiftDetail(); });
+document.getElementById("giftSearchInput").addEventListener("input", renderGiftGrid);
+document.getElementById("giftClearSearch").addEventListener("click", () => {
+  document.getElementById("giftSearchInput").value = "";
+  renderGiftGrid();
+});
+document.getElementById("giftResetAll").addEventListener("click", () => {
+  document.getElementById("giftSearchInput").value = "";
+  giftState.keyword = GIFT_KEYWORDS[0];
+  renderGiftView();
+});
 
 showDeckView();
 updateHeaderHeightVar();
