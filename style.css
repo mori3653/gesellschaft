@@ -616,6 +616,7 @@
   .deck-layout{ max-width:1180px; margin:0 auto; padding:22px 24px 60px; display:flex; flex-direction:column; gap:22px; }
   #searchView[hidden], #deckView[hidden], #skillSetView[hidden], #giftView[hidden], .search-row[hidden], footer.note[hidden]{ display:none !important; }
   .gift-layout{ display:block; }
+  .enemy-layout{ display:block; }
 
   /* ---------- 스킬셋 ---------- */
   .skillset-skill-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
