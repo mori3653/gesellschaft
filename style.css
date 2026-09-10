@@ -614,7 +614,7 @@
 
   /* ---------- deck builder ---------- */
   .deck-layout{ max-width:1180px; margin:0 auto; padding:22px 24px 60px; display:flex; flex-direction:column; gap:22px; }
-  #searchView[hidden], #deckView[hidden], #skillSetView[hidden], #giftView[hidden], .search-row[hidden], footer.note[hidden]{ display:none !important; }
+  #searchView[hidden], #deckView[hidden], #skillSetView[hidden], #giftView[hidden], #enemyView[hidden], .search-row[hidden], footer.note[hidden]{ display:none !important; }
   .gift-layout{ display:block; }
   .enemy-layout{ display:block; }
 
