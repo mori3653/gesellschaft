@@ -5607,6 +5607,7 @@ function enemyCardHTML(e){
   const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
   return `
     <div class="card enemy-card" data-name="${escapeHTML(e.name)}" data-chapter="${escapeHTML(e.chapter)}">
+      ${e.image ? `<img class="card-banner enemy-card-banner" src="${e.image}" alt="">` : ""}
       <div class="card-body">
         <div class="gift-card-head">
           <span class="gift-card-name">${escapeHTML(e.name)}</span>
@@ -5647,6 +5648,7 @@ function openEnemyDetail(name, chapter){
   if (!e) return;
   document.getElementById("enemyDetailTitle").textContent = `${e.name} (${e.chapter})`;
   const rows = [];
+  if (e.image) rows.push(`<img class="enemy-detail-image" src="${e.image}" alt="">`);
   rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(e.group)}</span></div>`);
   if (e.hp != null){
     rows.push(`<div class="skill-tt-row"><span>HP</span><span>${escapeHTML(e.hp)}</span></div>`);
