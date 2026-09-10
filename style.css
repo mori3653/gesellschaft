@@ -401,6 +401,29 @@
   }
   .gift-tag-cost{ color:var(--accent-strong); }
   .gift-tag-warn{ color:#c0392b; border-color:#c0392b; }
+
+  /* ---------- 적 정보 ---------- */
+  .enemy-ch-tabs{
+    flex-wrap:wrap; width:auto;
+    position:sticky; top:var(--header-h, 96px); z-index:8;
+    background:var(--bg); box-shadow:var(--shadow);
+    margin-bottom:10px; padding:4px 0;
+  }
+  .enemy-card{ cursor:pointer; transition:border-color .12s; }
+  .enemy-card:hover{ border-color:var(--text-faint); }
+  .enemy-card-tag{ font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .enemy-stat-row{
+    display:flex; gap:12px; font-size:12.5px; color:var(--text-muted);
+    font-family:"IBM Plex Mono",monospace; margin-top:6px;
+  }
+  .enemy-stat-empty{ font-family:inherit; color:var(--text-faint); font-style:italic; }
+  .res-badge-grid{ display:flex; flex-wrap:wrap; gap:6px; }
+  .res-badge{
+    display:flex; align-items:center; gap:4px;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:6px; padding:3px 7px; font-size:11.5px;
+  }
+  .res-badge-tier{ font-weight:700; }
   .ego-cond-tag{
     display:inline-flex; align-items:center; gap:3px; flex-wrap:wrap;
     font-size:10px; color:var(--text-faint);

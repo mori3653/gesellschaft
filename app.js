@@ -5356,18 +5356,22 @@ document.getElementById("ownedOnlyToggle").addEventListener("change", e => {
 
 const tabSkillSet = document.getElementById("tabSkillSet");
 const tabGift = document.getElementById("tabGift");
+const tabEnemy = document.getElementById("tabEnemy");
 function showSearchView(){
   tabSearch.setAttribute("aria-pressed","true");
   tabDeck.setAttribute("aria-pressed","false");
   tabSkillSet.setAttribute("aria-pressed","false");
   tabGift.setAttribute("aria-pressed","false");
+  tabEnemy.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = false;
   document.getElementById("searchRow").hidden = false;
   document.getElementById("skillSetSearchRow").hidden = true;
   document.getElementById("giftSearchRow").hidden = true;
+  document.getElementById("enemySearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = false;
   document.getElementById("skillSetView").hidden = true;
   document.getElementById("giftView").hidden = true;
+  document.getElementById("enemyView").hidden = true;
   document.getElementById("deckView").hidden = true;
   pickerView.hidden = true;
   ownedView.hidden = true;
@@ -5378,13 +5382,16 @@ function showSkillSetView(){
   tabDeck.setAttribute("aria-pressed","false");
   tabSkillSet.setAttribute("aria-pressed","true");
   tabGift.setAttribute("aria-pressed","false");
+  tabEnemy.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
   document.getElementById("skillSetSearchRow").hidden = false;
   document.getElementById("giftSearchRow").hidden = true;
+  document.getElementById("enemySearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = true;
   document.getElementById("skillSetView").hidden = false;
   document.getElementById("giftView").hidden = true;
+  document.getElementById("enemyView").hidden = true;
   document.getElementById("deckView").hidden = true;
   pickerView.hidden = true;
   ownedView.hidden = true;
@@ -5396,13 +5403,16 @@ function showDeckView(){
   tabDeck.setAttribute("aria-pressed","true");
   tabSkillSet.setAttribute("aria-pressed","false");
   tabGift.setAttribute("aria-pressed","false");
+  tabEnemy.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
   document.getElementById("skillSetSearchRow").hidden = true;
   document.getElementById("giftSearchRow").hidden = true;
+  document.getElementById("enemySearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = true;
   document.getElementById("skillSetView").hidden = true;
   document.getElementById("giftView").hidden = true;
+  document.getElementById("enemyView").hidden = true;
   document.getElementById("deckView").hidden = false;
   pickerView.hidden = true;
   ownedView.hidden = true;
@@ -5414,23 +5424,48 @@ function showGiftView(){
   tabDeck.setAttribute("aria-pressed","false");
   tabSkillSet.setAttribute("aria-pressed","false");
   tabGift.setAttribute("aria-pressed","true");
+  tabEnemy.setAttribute("aria-pressed","false");
   document.getElementById("searchView").hidden = true;
   document.getElementById("searchRow").hidden = true;
   document.getElementById("skillSetSearchRow").hidden = true;
   document.getElementById("giftSearchRow").hidden = false;
+  document.getElementById("enemySearchRow").hidden = true;
   document.getElementById("searchFooter").hidden = true;
   document.getElementById("skillSetView").hidden = true;
   document.getElementById("giftView").hidden = false;
+  document.getElementById("enemyView").hidden = true;
   document.getElementById("deckView").hidden = true;
   pickerView.hidden = true;
   ownedView.hidden = true;
   updateHeaderHeightVar();
   renderGiftView();
 }
+function showEnemyView(){
+  tabSearch.setAttribute("aria-pressed","false");
+  tabDeck.setAttribute("aria-pressed","false");
+  tabSkillSet.setAttribute("aria-pressed","false");
+  tabGift.setAttribute("aria-pressed","false");
+  tabEnemy.setAttribute("aria-pressed","true");
+  document.getElementById("searchView").hidden = true;
+  document.getElementById("searchRow").hidden = true;
+  document.getElementById("skillSetSearchRow").hidden = true;
+  document.getElementById("giftSearchRow").hidden = true;
+  document.getElementById("enemySearchRow").hidden = false;
+  document.getElementById("searchFooter").hidden = true;
+  document.getElementById("skillSetView").hidden = true;
+  document.getElementById("giftView").hidden = true;
+  document.getElementById("enemyView").hidden = false;
+  document.getElementById("deckView").hidden = true;
+  pickerView.hidden = true;
+  ownedView.hidden = true;
+  updateHeaderHeightVar();
+  renderEnemyView();
+}
 tabSearch.addEventListener("click", showSearchView);
 tabDeck.addEventListener("click", showDeckView);
 tabSkillSet.addEventListener("click", showSkillSetView);
 tabGift.addEventListener("click", showGiftView);
+tabEnemy.addEventListener("click", showEnemyView);
 
 /* ---- 에고 기프트 ---- */
 const GIFT_KEYWORDS = ["화상","출혈","진동","파열","침잠","충전","호흡","참격","관통","타격","범용"];
@@ -5531,6 +5566,135 @@ document.getElementById("giftResetAll").addEventListener("click", () => {
   document.getElementById("giftSearchInput").value = "";
   giftState.keyword = GIFT_KEYWORDS[0];
   renderGiftView();
+});
+
+/* ---- 적 정보 ---- */
+const ENEMY_CHAPTERS = [...new Set(ENEMY_DATA.slice().sort((a,b) => a.chapterNum - b.chapterNum).map(e => e.chapter))];
+const enemyState = { chapter: ENEMY_CHAPTERS[0] };
+const RES_TIER_COLOR = {"약점":"#c0392b","취약":"#d9743a","보통":"#8a8f98","견딤":"#4a90c4","내성":"#2f6f4f","?":"#5c6066"};
+const ATTACK_TYPE_KW = ["참격","관통","타격"];
+const SIN_KW = ["분노","색욕","나태","탐식","우울","질투","오만"];
+
+function resBadgeHTML(kw, tier){
+  const color = RES_TIER_COLOR[tier] || "#5c6066";
+  const iconSrc = KEYWORD_ICON_DATA[kw] || SIN_ICON_DATA[kw];
+  return `<div class="res-badge" title="${escapeHTML(kw)}: ${escapeHTML(tier)}">
+    ${iconSrc ? `<img src="${iconSrc}" width="16" height="16" alt="" style="object-fit:contain;">` : `<span>${escapeHTML(kw)}</span>`}
+    <span class="res-badge-tier" style="color:${color}">${escapeHTML(tier)}</span>
+  </div>`;
+}
+function renderEnemyChTabs(){
+  const wrap = document.getElementById("enemyChTabs");
+  wrap.innerHTML = ENEMY_CHAPTERS.map(ch =>
+    `<button type="button" class="view-tab" data-ch="${escapeHTML(ch)}" aria-pressed="${ch === enemyState.chapter}">${escapeHTML(ch)}</button>`
+  ).join("");
+  wrap.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      enemyState.chapter = btn.dataset.ch;
+      renderEnemyChTabs();
+      renderEnemyGrid();
+    });
+  });
+}
+function enemyMatchesQuery(e, q){
+  if (!q) return true;
+  return e.name.toLowerCase().includes(q.toLowerCase());
+}
+function enemyCardHTML(e){
+  const statRow = (e.hp != null) ? `<div class="enemy-stat-row">
+      <span>HP ${escapeHTML(e.hp)}</span><span>속도 ${escapeHTML(e.speed || "?")}</span><span>방어 ${escapeHTML(e.defense || "?")}</span>
+    </div>` : `<div class="enemy-stat-row enemy-stat-empty">스탯 정보 없음</div>`;
+  const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
+  return `
+    <div class="card enemy-card" data-name="${escapeHTML(e.name)}" data-chapter="${escapeHTML(e.chapter)}">
+      <div class="card-body">
+        <div class="gift-card-head">
+          <span class="gift-card-name">${escapeHTML(e.name)}</span>
+        </div>
+        <div class="enemy-card-tag">${escapeHTML(e.chapter)} · ${escapeHTML(e.group)}</div>
+        ${statRow}
+        ${kwChips ? `<div class="gift-card-foot">${kwChips}</div>` : ""}
+      </div>
+    </div>`;
+}
+function renderEnemyGrid(){
+  const q = document.getElementById("enemySearchInput").value.trim();
+  const list = ENEMY_DATA.filter(e => e.chapter === enemyState.chapter && enemyMatchesQuery(e, q));
+  document.getElementById("enemyShownCount").textContent = list.length;
+  const grid = document.getElementById("enemyGrid");
+  grid.innerHTML = list.map(enemyCardHTML).join("");
+  document.getElementById("enemyEmptyState").hidden = list.length > 0;
+  grid.querySelectorAll(".enemy-card").forEach(el => {
+    el.addEventListener("click", () => openEnemyDetail(el.dataset.name, el.dataset.chapter));
+  });
+}
+function renderEnemyView(){
+  renderEnemyChTabs();
+  renderEnemyGrid();
+}
+function enemySkillRowHTML(s){
+  const rows = [`<div class="skill-tt-name">${escapeHTML(s.name)}</div>`];
+  const bits = [];
+  if (s.sinAttribute) bits.push(`<span class="skill-tt-row"><span>속성</span><span>${sinBadgeSVG(s.sinAttribute,14)}${escapeHTML(s.sinAttribute)}</span></span>`);
+  if (s.attackType) bits.push(`<div class="skill-tt-row"><span>공격 유형</span><span>${escapeHTML(s.attackType)}</span></div>`);
+  if (s.power) bits.push(`<div class="skill-tt-row"><span>위력</span><span>${escapeHTML(s.power)}</span></div>`);
+  if (s.coinPower) bits.push(`<div class="skill-tt-row"><span>코인 위력</span><span>${escapeHTML(s.coinPower)}</span></div>`);
+  if (s.attackWeight) bits.push(`<div class="skill-tt-row"><span>공격 가중치</span><span>${escapeHTML(s.attackWeight)}</span></div>`);
+  return `<div class="skill-tt-special-block">${rows.join("")}${bits.join("")}</div>`;
+}
+function openEnemyDetail(name, chapter){
+  const e = ENEMY_DATA.find(x => x.name === name && x.chapter === chapter);
+  if (!e) return;
+  document.getElementById("enemyDetailTitle").textContent = `${e.name} (${e.chapter})`;
+  const rows = [];
+  rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(e.group)}</span></div>`);
+  if (e.hp != null){
+    rows.push(`<div class="skill-tt-row"><span>HP</span><span>${escapeHTML(e.hp)}</span></div>`);
+    rows.push(`<div class="skill-tt-row"><span>속도</span><span>${escapeHTML(e.speed || "?")}</span></div>`);
+    rows.push(`<div class="skill-tt-row"><span>방어력</span><span>${escapeHTML(e.defense || "?")}</span></div>`);
+  }
+  if (e.staggerThreshold) rows.push(`<div class="skill-tt-row"><span>흐트러짐 구간</span><span>${escapeHTML(e.staggerThreshold)}</span></div>`);
+  if (e.bodyParts) rows.push(`<div class="skill-tt-row"><span>부위</span><span>${escapeHTML(e.bodyParts)}</span></div>`);
+  if (e.ego) rows.push(`<div class="skill-tt-row"><span>E.G.O</span><span>${escapeHTML(e.ego)}</span></div>`);
+  if (e.egoGift) rows.push(`<div class="skill-tt-row"><span>E.G.O 기프트</span><span>${escapeHTML(e.egoGift)}</span></div>`);
+  if (e.resistances){
+    const badges = [...ATTACK_TYPE_KW, ...SIN_KW].filter(k => e.resistances[k]).map(k => resBadgeHTML(k, e.resistances[k])).join("");
+    rows.push(`<div class="skill-tt-effect-block"><div class="detail-col-label">내성</div><div class="res-badge-grid">${badges}</div></div>`);
+  }
+  const kwList = (e.keywords || []).filter(k => k && k !== "-");
+  if (kwList.length) rows.push(`<div class="skill-tt-row"><span>키워드</span><span>${kwList.map(escapeHTML).join(", ")}</span></div>`);
+  if (e.panicType && e.panicType.type){
+    const p = e.panicType;
+    const detail = Object.keys(p).filter(k => k !== "type" && p[k] && p[k] !== "-").map(k => `${escapeHTML(k)} ${escapeHTML(p[k])}`).join(" / ");
+    rows.push(`<div class="skill-tt-row"><span>패닉 유형</span><span>${escapeHTML(p.type)}${detail ? " — " + detail : ""}</span></div>`);
+  }
+  if (e.passives && e.passives.length){
+    const passiveHTML = e.passives.map(p => {
+      if (typeof p === "string") return `<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${escapeHTML(p)}</span></div></div>`;
+      const label = p.name ? `<div class="skill-tt-name">${escapeHTML(p.name)}</div>` : "";
+      return `<div class="skill-tt-special-block">${label}<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${escapeHTML(p.effect || "")}</span></div></div></div>`;
+    }).join("");
+    rows.push(`<div class="detail-passive-section"><div class="detail-col-label">패시브</div>${passiveHTML}</div>`);
+  }
+  if (e.skills && e.skills.length){
+    rows.push(`<div class="detail-passive-section"><div class="detail-col-label">스킬</div>${e.skills.map(enemySkillRowHTML).join("")}</div>`);
+  }
+  document.getElementById("enemyDetailBody").innerHTML = rows.join("");
+  document.getElementById("enemyDetailModal").hidden = false;
+}
+function closeEnemyDetail(){ document.getElementById("enemyDetailModal").hidden = true; }
+document.getElementById("enemyDetailClose").addEventListener("click", closeEnemyDetail);
+document.getElementById("enemyDetailBackdrop").addEventListener("click", closeEnemyDetail);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("enemyDetailModal").hidden) closeEnemyDetail(); });
+document.getElementById("enemySearchInput").addEventListener("input", renderEnemyGrid);
+document.getElementById("enemyClearSearch").addEventListener("click", () => {
+  document.getElementById("enemySearchInput").value = "";
+  renderEnemyGrid();
+});
+document.getElementById("enemyResetAll").addEventListener("click", () => {
+  document.getElementById("enemySearchInput").value = "";
+  enemyState.chapter = ENEMY_CHAPTERS[0];
+  renderEnemyView();
 });
 
 showDeckView();
