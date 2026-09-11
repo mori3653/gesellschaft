@@ -593,6 +593,11 @@
   .detail-passive-section{
     margin-top:18px; padding-top:16px; border-top:1px solid var(--border);
   }
+  .enemy-skill-icon-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .enemy-skill-icon{
+    width:48px; height:48px; object-fit:contain; border-radius:6px;
+    background:var(--surface-2); border:1px solid var(--border-strong); padding:3px;
+  }
 
   .card-tags{
     margin-top:auto; padding-top:8px;

@@ -5717,6 +5717,12 @@ function enemyDetailBodyHTML(e){
   if (e.skills && e.skills.length){
     rows.push(`<div class="detail-passive-section"><div class="detail-col-label">스킬</div>${e.skills.map(enemySkillRowHTML).join("")}</div>`);
   }
+  if (e.skillIcons && e.skillIcons.length){
+    const icons = e.skillIcons.map(s =>
+      `<img class="enemy-skill-icon" src="${s.icon}" alt="${escapeHTML(s.alt)}" title="${escapeHTML(s.alt)}" width="48" height="48">`
+    ).join("");
+    rows.push(`<div class="detail-passive-section"><div class="detail-col-label">스킬 아이콘</div><div class="enemy-skill-icon-grid">${icons}</div></div>`);
+  }
   return rows.join("");
 }
 let enemyDetailState = { idxs: [], round: 0 };
