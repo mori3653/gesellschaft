@@ -5634,7 +5634,7 @@ function renderEnemyGrid(){
   const q = document.getElementById("enemySearchInput").value.trim();
   const filtered = ENEMY_DATA
     .map((e, idx) => ({e, idx}))
-    .filter(({e}) => e.chapter === enemyState.chapter && enemyMatchesQuery(e, q));
+    .filter(({e}) => (q ? true : e.chapter === enemyState.chapter) && enemyMatchesQuery(e, q));
   const groupMap = new Map();
   filtered.forEach(item => {
     const key = enemyIdentity(item.e, item.idx);
