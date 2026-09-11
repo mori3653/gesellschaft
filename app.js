@@ -5600,13 +5600,13 @@ function enemyMatchesQuery(e, q){
   if (!q) return true;
   return e.name.toLowerCase().includes(q.toLowerCase());
 }
-function enemyCardHTML(e){
+function enemyCardHTML(e, idx){
   const statRow = (e.hp != null) ? `<div class="enemy-stat-row">
       <span>HP ${escapeHTML(e.hp)}</span><span>속도 ${escapeHTML(e.speed || "?")}</span><span>방어 ${escapeHTML(e.defense || "?")}</span>
     </div>` : `<div class="enemy-stat-row enemy-stat-empty">스탯 정보 없음</div>`;
   const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
   return `
-    <div class="card enemy-card" data-name="${escapeHTML(e.name)}" data-chapter="${escapeHTML(e.chapter)}">
+    <div class="card enemy-card" data-idx="${idx}">
       ${e.image ? `<img class="card-banner enemy-card-banner" src="${e.image}" alt="">` : ""}
       <div class="card-body">
         <div class="gift-card-head">
@@ -5620,13 +5620,15 @@ function enemyCardHTML(e){
 }
 function renderEnemyGrid(){
   const q = document.getElementById("enemySearchInput").value.trim();
-  const list = ENEMY_DATA.filter(e => e.chapter === enemyState.chapter && enemyMatchesQuery(e, q));
+  const list = ENEMY_DATA
+    .map((e, idx) => ({e, idx}))
+    .filter(({e}) => e.chapter === enemyState.chapter && enemyMatchesQuery(e, q));
   document.getElementById("enemyShownCount").textContent = list.length;
   const grid = document.getElementById("enemyGrid");
-  grid.innerHTML = list.map(enemyCardHTML).join("");
+  grid.innerHTML = list.map(({e, idx}) => enemyCardHTML(e, idx)).join("");
   document.getElementById("enemyEmptyState").hidden = list.length > 0;
   grid.querySelectorAll(".enemy-card").forEach(el => {
-    el.addEventListener("click", () => openEnemyDetail(el.dataset.name, el.dataset.chapter));
+    el.addEventListener("click", () => openEnemyDetail(Number(el.dataset.idx)));
   });
 }
 function renderEnemyView(){
@@ -5643,8 +5645,8 @@ function enemySkillRowHTML(s){
   if (s.attackWeight) bits.push(`<div class="skill-tt-row"><span>공격 가중치</span><span>${escapeHTML(s.attackWeight)}</span></div>`);
   return `<div class="skill-tt-special-block">${rows.join("")}${bits.join("")}</div>`;
 }
-function openEnemyDetail(name, chapter){
-  const e = ENEMY_DATA.find(x => x.name === name && x.chapter === chapter);
+function openEnemyDetail(idx){
+  const e = ENEMY_DATA[idx];
   if (!e) return;
   document.getElementById("enemyDetailTitle").textContent = `${e.name} (${e.chapter})`;
   const rows = [];
