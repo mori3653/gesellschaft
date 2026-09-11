@@ -5600,35 +5600,54 @@ function enemyMatchesQuery(e, q){
   if (!q) return true;
   return e.name.toLowerCase().includes(q.toLowerCase());
 }
-function enemyCardHTML(e, idx){
+// 같은 개체가 여러 차례(페이즈/차전)에 걸쳐 등장하는 경우 카드 하나로 묶기 위한 식별자.
+// "N페이즈"류 이름은 소속 그룹(부모 보스 이름)을 식별자로 쓰고, "???"는 서로 다른 미공개
+// 개체일 수 있으므로 절대 묶지 않는다.
+function enemyIdentity(e, idx){
+  if (e.name === "???") return `__unique_${idx}`;
+  if (/^\d+(페이즈|차전)$/.test(e.name)) return `${e.chapter}|${e.group}`;
+  return e.name;
+}
+function enemyCardHTML(group){
+  const e = group[0].e;
+  const idxs = group.map(g => g.idx);
   const statRow = (e.hp != null) ? `<div class="enemy-stat-row">
       <span>HP ${escapeHTML(e.hp)}</span><span>속도 ${escapeHTML(e.speed || "?")}</span><span>방어 ${escapeHTML(e.defense || "?")}</span>
     </div>` : `<div class="enemy-stat-row enemy-stat-empty">스탯 정보 없음</div>`;
   const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
+  const roundBadge = group.length > 1 ? `<span class="gift-tag gift-tag-cost">${group.length}차전</span>` : "";
+  const img = group.find(g => g.e.image) && group.find(g => g.e.image).e.image;
   return `
-    <div class="card enemy-card" data-idx="${idx}">
-      ${e.image ? `<img class="card-banner enemy-card-banner" src="${e.image}" alt="">` : ""}
+    <div class="card enemy-card" data-idxs="${idxs.join(",")}">
+      ${img ? `<img class="card-banner enemy-card-banner" src="${img}" alt="">` : ""}
       <div class="card-body">
         <div class="gift-card-head">
           <span class="gift-card-name">${escapeHTML(e.name)}</span>
         </div>
         <div class="enemy-card-tag">${escapeHTML(e.chapter)} · ${escapeHTML(e.group)}</div>
         ${statRow}
-        ${kwChips ? `<div class="gift-card-foot">${kwChips}</div>` : ""}
+        <div class="gift-card-foot">${roundBadge}${kwChips}</div>
       </div>
     </div>`;
 }
 function renderEnemyGrid(){
   const q = document.getElementById("enemySearchInput").value.trim();
-  const list = ENEMY_DATA
+  const filtered = ENEMY_DATA
     .map((e, idx) => ({e, idx}))
     .filter(({e}) => e.chapter === enemyState.chapter && enemyMatchesQuery(e, q));
-  document.getElementById("enemyShownCount").textContent = list.length;
+  const groupMap = new Map();
+  filtered.forEach(item => {
+    const key = enemyIdentity(item.e, item.idx);
+    if (!groupMap.has(key)) groupMap.set(key, []);
+    groupMap.get(key).push(item);
+  });
+  const groups = [...groupMap.values()];
+  document.getElementById("enemyShownCount").textContent = groups.length;
   const grid = document.getElementById("enemyGrid");
-  grid.innerHTML = list.map(({e, idx}) => enemyCardHTML(e, idx)).join("");
-  document.getElementById("enemyEmptyState").hidden = list.length > 0;
+  grid.innerHTML = groups.map(enemyCardHTML).join("");
+  document.getElementById("enemyEmptyState").hidden = groups.length > 0;
   grid.querySelectorAll(".enemy-card").forEach(el => {
-    el.addEventListener("click", () => openEnemyDetail(Number(el.dataset.idx)));
+    el.addEventListener("click", () => openEnemyDetail(el.dataset.idxs.split(",").map(Number)));
   });
 }
 function renderEnemyView(){
@@ -5645,10 +5664,7 @@ function enemySkillRowHTML(s){
   if (s.attackWeight) bits.push(`<div class="skill-tt-row"><span>공격 가중치</span><span>${escapeHTML(s.attackWeight)}</span></div>`);
   return `<div class="skill-tt-special-block">${rows.join("")}${bits.join("")}</div>`;
 }
-function openEnemyDetail(idx){
-  const e = ENEMY_DATA[idx];
-  if (!e) return;
-  document.getElementById("enemyDetailTitle").textContent = `${e.name} (${e.chapter})`;
+function enemyDetailBodyHTML(e){
   const rows = [];
   if (e.image) rows.push(`<img class="enemy-detail-image" src="${e.image}" alt="">`);
   rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(e.group)}</span></div>`);
@@ -5683,7 +5699,38 @@ function openEnemyDetail(idx){
   if (e.skills && e.skills.length){
     rows.push(`<div class="detail-passive-section"><div class="detail-col-label">스킬</div>${e.skills.map(enemySkillRowHTML).join("")}</div>`);
   }
-  document.getElementById("enemyDetailBody").innerHTML = rows.join("");
+  return rows.join("");
+}
+let enemyDetailState = { idxs: [], round: 0 };
+function renderEnemyDetailBody(){
+  const idx = enemyDetailState.idxs[enemyDetailState.round];
+  const e = ENEMY_DATA[idx];
+  document.getElementById("enemyDetailBody").innerHTML = enemyDetailBodyHTML(e);
+}
+function openEnemyDetail(idxs){
+  const list = Array.isArray(idxs) ? idxs : [idxs];
+  const first = ENEMY_DATA[list[0]];
+  if (!first) return;
+  enemyDetailState = { idxs: list, round: 0 };
+  document.getElementById("enemyDetailTitle").textContent = `${first.name} (${first.chapter})`;
+  const roundTabsWrap = document.getElementById("enemyDetailRoundTabs");
+  if (list.length > 1){
+    roundTabsWrap.hidden = false;
+    roundTabsWrap.innerHTML = list.map((idx, i) =>
+      `<button type="button" class="view-tab" data-round="${i}" aria-pressed="${i===0}">${i+1}차전</button>`
+    ).join("");
+    roundTabsWrap.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        enemyDetailState.round = Number(btn.dataset.round);
+        roundTabsWrap.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+        renderEnemyDetailBody();
+      });
+    });
+  } else {
+    roundTabsWrap.hidden = true;
+    roundTabsWrap.innerHTML = "";
+  }
+  renderEnemyDetailBody();
   document.getElementById("enemyDetailModal").hidden = false;
 }
 function closeEnemyDetail(){ document.getElementById("enemyDetailModal").hidden = true; }
