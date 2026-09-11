@@ -5493,7 +5493,7 @@ function renderGiftKwTabs(){
 }
 function giftMatchesQuery(g, q){
   if (!q) return true;
-  const hay = (g.name + " " + g.effect).toLowerCase();
+  const hay = [g.name, g.effect, g.english, ...(g.aliases || [])].filter(Boolean).join(" ").toLowerCase();
   return hay.includes(q.toLowerCase());
 }
 function giftCardHTML(g){
@@ -5519,7 +5519,7 @@ function giftCardHTML(g){
 function renderGiftGrid(){
   const q = document.getElementById("giftSearchInput").value.trim();
   const list = EGO_GIFT_DATA
-    .filter(g => g.keyword === giftState.keyword && giftMatchesQuery(g, q))
+    .filter(g => (q ? true : g.keyword === giftState.keyword) && giftMatchesQuery(g, q))
     .sort((a,b) => a.rankNum - b.rankNum || a.name.localeCompare(b.name, "ko"));
   document.getElementById("giftShownCount").textContent = list.length;
   const grid = document.getElementById("giftGrid");
@@ -5543,6 +5543,8 @@ function openGiftDetail(name){
   rows.push(`<div class="skill-tt-row"><span>키워드</span><span>${giftKeywordIconHTML(g.keyword,16)} ${escapeHTML(g.keyword)}</span></div>`);
   if (g.cost != null) rows.push(`<div class="skill-tt-row"><span>코스트</span><span>${g.cost.toLocaleString()}${g.purchasable ? "" : " (구매불가)"}</span></div>`);
   if (g.restriction) rows.push(`<div class="skill-tt-row"><span>제한</span><span>${escapeHTML(g.restriction)}</span></div>`);
+  if (g.aliases && g.aliases.length) rows.push(`<div class="skill-tt-row"><span>통칭</span><span>${g.aliases.map(escapeHTML).join(", ")}</span></div>`);
+  if (g.english) rows.push(`<div class="skill-tt-row"><span>영문명</span><span>${escapeHTML(g.english)}</span></div>`);
   if (g.associated) rows.push(`<div class="skill-tt-row"><span>연관</span><span>${escapeHTML(g.associated)}</span></div>`);
   if (g.firstAppearance) rows.push(`<div class="skill-tt-row"><span>첫 등장</span><span>${escapeHTML(g.firstAppearance)}</span></div>`);
   if (g.upgradable) rows.push(`<div class="skill-tt-row"><span>강화</span><span>${escapeHTML(g.upgradable)}</span></div>`);
