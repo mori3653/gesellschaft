@@ -401,6 +401,14 @@
   }
   .gift-tag-cost{ color:var(--accent-strong); }
   .gift-tag-warn{ color:#c0392b; border-color:#c0392b; }
+  .gift-recipe-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+  .gift-recipe-plus{ color:var(--text-faint); font-weight:700; }
+  .gift-link-chip{
+    font: inherit; font-size:12px; font-weight:600; color:var(--accent-strong);
+    background:var(--surface-2); border:1px solid var(--border-strong);
+    border-radius:5px; padding:2px 8px; cursor:pointer; transition:border-color .12s, background .12s;
+  }
+  .gift-link-chip:hover{ background:var(--surface-3, var(--surface-2)); border-color:var(--accent-strong); }
 
   /* ---------- 적 정보 ---------- */
   .enemy-ch-tabs{

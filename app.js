@@ -5534,6 +5534,9 @@ function renderGiftView(){
   renderGiftKwTabs();
   renderGiftGrid();
 }
+function giftLinkChipHTML(name){
+  return `<button type="button" class="gift-link-chip" data-gift="${escapeHTML(name)}">${escapeHTML(name)}</button>`;
+}
 function openGiftDetail(name){
   const g = EGO_GIFT_DATA.find(x => x.name === name);
   if (!g) return;
@@ -5549,11 +5552,23 @@ function openGiftDetail(name){
   if (g.associated) rows.push(`<div class="skill-tt-row"><span>연관</span><span>${escapeHTML(g.associated)}</span></div>`);
   if (g.firstAppearance) rows.push(`<div class="skill-tt-row"><span>첫 등장</span><span>${escapeHTML(g.firstAppearance)}</span></div>`);
   if (g.upgradable) rows.push(`<div class="skill-tt-row"><span>강화</span><span>${escapeHTML(g.upgradable)}</span></div>`);
+  if (g.recipe && g.recipe.length){
+    const chips = g.recipe.map(giftLinkChipHTML).join(`<span class="gift-recipe-plus">+</span>`);
+    rows.push(`<div class="skill-tt-row"><span>조합법</span><span class="gift-recipe-row">${chips}</span></div>`);
+  }
+  if (g.usedIn && g.usedIn.length){
+    const chips = g.usedIn.map(giftLinkChipHTML).join("");
+    rows.push(`<div class="skill-tt-row"><span>조합 재료로 사용됨</span><span class="gift-recipe-row">${chips}</span></div>`);
+  }
   rows.push(`<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${linkifyKeywords(g.effect).replace(/\n/g,"<br>")}</span></div></div>`);
   (g.extraNotes || []).forEach(n => {
     rows.push(`<div class="skill-tt-effect-block"><div class="skill-tt-coin-effect"><span>${linkifyKeywords(n).replace(/\n/g,"<br>")}</span></div></div>`);
   });
-  document.getElementById("giftDetailBody").innerHTML = rows.join("");
+  const body = document.getElementById("giftDetailBody");
+  body.innerHTML = rows.join("");
+  body.querySelectorAll(".gift-link-chip").forEach(el => {
+    el.addEventListener("click", () => openGiftDetail(el.dataset.gift));
+  });
   document.getElementById("giftDetailModal").hidden = false;
 }
 function closeGiftDetail(){ document.getElementById("giftDetailModal").hidden = true; }
