@@ -5680,7 +5680,11 @@ function enemySkillRowHTML(s){
   if (s.power) bits.push(`<div class="skill-tt-row"><span>위력</span><span>${escapeHTML(s.power)}</span></div>`);
   if (s.coinPower) bits.push(`<div class="skill-tt-row"><span>코인 위력</span><span>${escapeHTML(s.coinPower)}</span></div>`);
   if (s.attackWeight) bits.push(`<div class="skill-tt-row"><span>공격 가중치</span><span>${escapeHTML(s.attackWeight)}</span></div>`);
-  return `<div class="skill-tt-special-block">${rows.join("")}${bits.join("")}</div>`;
+  const body = `<div class="enemy-skill-text">${rows.join("")}${bits.join("")}</div>`;
+  const content = s.icon
+    ? `<div class="enemy-skill-row-inline">${skillFrameHTML(s.sinAttribute, 44, 1, s.icon)}${body}</div>`
+    : body;
+  return `<div class="skill-tt-special-block">${content}</div>`;
 }
 function enemyDetailBodyHTML(e){
   const rows = [];
