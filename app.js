@@ -5588,7 +5588,18 @@ document.getElementById("giftResetAll").addEventListener("click", () => {
 
 /* ---- 적 정보 ---- */
 const ENEMY_CHAPTERS = [...new Set(ENEMY_DATA.slice().sort((a,b) => a.chapterNum - b.chapterNum).map(e => e.chapter))];
-const enemyState = { chapter: ENEMY_CHAPTERS[0] };
+// "N장"과 "N장 집중 전투"는 나무위키에서도 같은 챕터의 하위 서브탭으로 존재하며
+// (4~8장에만 있음, 그 외 챕터는 애초에 집중 전투 자체가 없음), 탭 목록에서는
+// 베이스 챕터명만 최상위로 노출하고 집중 전투 여부는 서브탭으로 따로 표시한다.
+const ENEMY_BASE_CHAPTERS = [...new Set(ENEMY_CHAPTERS.map(ch => ch.replace(/ 집중 전투$/, "")))];
+function enemyFocusedChapter(base){
+  const focused = `${base} 집중 전투`;
+  return ENEMY_CHAPTERS.includes(focused) ? focused : null;
+}
+const enemyState = { base: ENEMY_BASE_CHAPTERS[0], mode: "일반" };
+function enemyCurrentChapter(){
+  return enemyState.mode === "집중 전투" ? enemyFocusedChapter(enemyState.base) : enemyState.base;
+}
 const RES_TIER_COLOR = {"약점":"#c0392b","취약":"#d9743a","보통":"#8a8f98","견딤":"#4a90c4","내성":"#2f6f4f","?":"#5c6066"};
 const ATTACK_TYPE_KW = ["참격","관통","타격"];
 const SIN_KW = ["분노","색욕","나태","탐식","우울","질투","오만"];
@@ -5603,13 +5614,35 @@ function resBadgeHTML(kw, tier){
 }
 function renderEnemyChTabs(){
   const wrap = document.getElementById("enemyChTabs");
-  wrap.innerHTML = ENEMY_CHAPTERS.map(ch =>
-    `<button type="button" class="view-tab" data-ch="${escapeHTML(ch)}" aria-pressed="${ch === enemyState.chapter}">${escapeHTML(ch)}</button>`
+  wrap.innerHTML = ENEMY_BASE_CHAPTERS.map(base =>
+    `<button type="button" class="view-tab" data-base="${escapeHTML(base)}" aria-pressed="${base === enemyState.base}">${escapeHTML(base)}</button>`
   ).join("");
   wrap.querySelectorAll("button").forEach(btn => {
     btn.addEventListener("click", () => {
-      enemyState.chapter = btn.dataset.ch;
+      enemyState.base = btn.dataset.base;
+      enemyState.mode = "일반";
       renderEnemyChTabs();
+      renderEnemySubTabs();
+      renderEnemyGrid();
+    });
+  });
+}
+function renderEnemySubTabs(){
+  const wrap = document.getElementById("enemySubTabs");
+  const focused = enemyFocusedChapter(enemyState.base);
+  if (!focused){
+    wrap.hidden = true;
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.hidden = false;
+  wrap.innerHTML = ["일반", "집중 전투"].map(mode =>
+    `<button type="button" class="view-tab" data-mode="${escapeHTML(mode)}" aria-pressed="${mode === enemyState.mode}">${escapeHTML(mode)}</button>`
+  ).join("");
+  wrap.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      enemyState.mode = btn.dataset.mode;
+      renderEnemySubTabs();
       renderEnemyGrid();
     });
   });
@@ -5652,7 +5685,7 @@ function renderEnemyGrid(){
   const q = document.getElementById("enemySearchInput").value.trim();
   const filtered = ENEMY_DATA
     .map((e, idx) => ({e, idx}))
-    .filter(({e}) => (q ? true : e.chapter === enemyState.chapter) && enemyMatchesQuery(e, q));
+    .filter(({e}) => (q ? true : e.chapter === enemyCurrentChapter()) && enemyMatchesQuery(e, q));
   const groupMap = new Map();
   filtered.forEach(item => {
     const key = enemyIdentity(item.e, item.idx);
@@ -5670,6 +5703,7 @@ function renderEnemyGrid(){
 }
 function renderEnemyView(){
   renderEnemyChTabs();
+  renderEnemySubTabs();
   renderEnemyGrid();
 }
 function enemySkillRowHTML(s){
@@ -5772,7 +5806,8 @@ document.getElementById("enemyClearSearch").addEventListener("click", () => {
 });
 document.getElementById("enemyResetAll").addEventListener("click", () => {
   document.getElementById("enemySearchInput").value = "";
-  enemyState.chapter = ENEMY_CHAPTERS[0];
+  enemyState.base = ENEMY_BASE_CHAPTERS[0];
+  enemyState.mode = "일반";
   renderEnemyView();
 });
 
