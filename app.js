@@ -5651,13 +5651,30 @@ function enemyMatchesQuery(e, q){
   if (!q) return true;
   return e.name.toLowerCase().includes(q.toLowerCase());
 }
-// 같은 개체가 여러 차례(페이즈/차전)에 걸쳐 등장하는 경우 카드 하나로 묶기 위한 식별자.
-// "N페이즈"류 이름은 소속 그룹(부모 보스 이름)을 식별자로 쓰고, "???"는 서로 다른 미공개
-// 개체일 수 있으므로 절대 묶지 않는다.
+// 같은 개체(보스)가 여러 차례(페이즈/차전)에 걸쳐 등장하거나, 페이즈마다 모습이
+// 바뀌는 경우(곤돌라/꿰뚫은 창/굳어진 꿈처럼 이름 자체가 달라지는 경우 포함)
+// 카드 하나로 묶기 위한 식별자. "N페이즈"/"OO 2페이즈"처럼 이름 자체가 회차를
+// 나타내는 경우, 또는 같은 챕터·그룹 내에 그런 회차 이름을 가진 형제가 있는
+// 경우 모두 소속 그룹(부모 보스 이름) 기준으로 묶는다.
+// "???"는 서로 다른 미공개 개체일 수 있으므로 절대 묶지 않는다.
+const PHASE_NAME_RE = /(^|\s)\d+(페이즈|차전)$/;
+const PHASE_GROUP_KEYS = new Set(
+  ENEMY_DATA.filter(e => e.group && PHASE_NAME_RE.test(e.name)).map(e => `${e.chapter}|${e.group}`)
+);
 function enemyIdentity(e, idx){
   if (e.name === "???") return `__unique_${idx}`;
-  if (/^\d+(페이즈|차전)$/.test(e.name)) return `${e.chapter}|${e.group}`;
+  const groupKey = e.group ? `${e.chapter}|${e.group}` : null;
+  if (PHASE_NAME_RE.test(e.name) || (groupKey && PHASE_GROUP_KEYS.has(groupKey))) return groupKey;
   return e.name;
+}
+// 카드/상세창 제목으로 쓸 이름. "1페이즈"처럼 그 자체로는 의미가 없는 회차성
+// 이름이면 소속 그룹(보스 이름)을 대신 보여준다.
+function enemyDisplayName(e){
+  return (PHASE_NAME_RE.test(e.name) && e.group) ? e.group : e.name;
+}
+// "목록"은 나무위키 목차 구조상 남은 내부 표기일 뿐 실제 분류명이 아니므로 숨긴다.
+function enemyGroupLabel(e){
+  return (e.group && e.group !== "목록") ? e.group : null;
 }
 function enemyCardHTML(group){
   const e = group[0].e;
@@ -5668,14 +5685,15 @@ function enemyCardHTML(group){
   const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
   const roundBadge = group.length > 1 ? `<span class="gift-tag gift-tag-cost">${group.length}차전</span>` : "";
   const img = group.find(g => g.e.image) && group.find(g => g.e.image).e.image;
+  const groupLabel = enemyGroupLabel(e);
   return `
     <div class="card enemy-card" data-idxs="${idxs.join(",")}">
       ${img ? `<img class="card-banner enemy-card-banner" src="${img}" alt="">` : ""}
       <div class="card-body">
         <div class="gift-card-head">
-          <span class="gift-card-name">${escapeHTML(e.name)}</span>
+          <span class="gift-card-name">${escapeHTML(enemyDisplayName(e))}</span>
         </div>
-        <div class="enemy-card-tag">${escapeHTML(e.chapter)} · ${escapeHTML(e.group)}</div>
+        <div class="enemy-card-tag">${escapeHTML(e.chapter)}${groupLabel ? " · " + escapeHTML(groupLabel) : ""}</div>
         ${statRow}
         <div class="gift-card-foot">${roundBadge}${kwChips}</div>
       </div>
@@ -5723,7 +5741,8 @@ function enemySkillRowHTML(s){
 function enemyDetailBodyHTML(e){
   const rows = [];
   if (e.image) rows.push(`<img class="enemy-detail-image" src="${e.image}" alt="">`);
-  rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(e.group)}</span></div>`);
+  const groupLabel = enemyGroupLabel(e);
+  if (groupLabel) rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(groupLabel)}</span></div>`);
   if (e.hp != null){
     rows.push(`<div class="skill-tt-row"><span>HP</span><span>${escapeHTML(e.hp)}</span></div>`);
     rows.push(`<div class="skill-tt-row"><span>속도</span><span>${escapeHTML(e.speed || "?")}</span></div>`);
@@ -5774,12 +5793,14 @@ function openEnemyDetail(idxs){
   const first = ENEMY_DATA[list[0]];
   if (!first) return;
   enemyDetailState = { idxs: list, round: 0 };
-  document.getElementById("enemyDetailTitle").textContent = `${first.name} (${first.chapter})`;
+  document.getElementById("enemyDetailTitle").textContent = `${enemyDisplayName(first)} (${first.chapter})`;
   const roundTabsWrap = document.getElementById("enemyDetailRoundTabs");
   if (list.length > 1){
     roundTabsWrap.hidden = false;
+    const roundNames = list.map(idx => ENEMY_DATA[idx].name);
+    const allSameName = roundNames.every(n => n === roundNames[0]);
     roundTabsWrap.innerHTML = list.map((idx, i) =>
-      `<button type="button" class="view-tab" data-round="${i}" aria-pressed="${i===0}">${i+1}차전</button>`
+      `<button type="button" class="view-tab" data-round="${i}" aria-pressed="${i===0}">${allSameName ? `${i+1}차전` : escapeHTML(roundNames[i])}</button>`
     ).join("");
     roundTabsWrap.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
