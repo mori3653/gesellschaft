@@ -365,6 +365,10 @@
     margin-bottom:10px; padding:4px 0;
   }
   .gift-kw-tabs .view-tab{ display:inline-flex; align-items:center; gap:5px; }
+  .gift-kw-all{ display:inline-flex; align-items:center; }
+  .gift-kw-all .gift-kw-faust{ display:none; }
+  body[data-fau-level="3"] .gift-kw-all .gift-kw-faust{ display:inline-block; }
+  body[data-fau-level="3"] .gift-kw-all .gift-kw-textbadge{ display:none; }
   .gift-kw-textbadge{
     display:inline-block; font-size:10px; font-weight:700; color:var(--text-muted);
     background:var(--surface-2); border:1px solid var(--border-strong);

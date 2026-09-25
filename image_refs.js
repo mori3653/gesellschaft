@@ -443,6 +443,7 @@ const GIFT_ICON_DATA = {
 
 const UI_ICON_DATA = {
   "skillFrame": "images/ui/1.webp",
+  "universalFaust": "images/keywords/universal_faust.webp",
 };
 
 const IDENTITY_SKILL_ICON_DATA = {

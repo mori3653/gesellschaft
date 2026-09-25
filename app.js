@@ -5503,7 +5503,7 @@ const GIFT_RANK_COLOR = {1:"#8a8f98", 2:"#3fa34d", 3:"#3b82c4", 4:"#8b5cf6", 5:"
 const giftState = { keyword: GIFT_KEYWORDS[0] };
 
 function giftKeywordIconHTML(kw, size){
-  if (kw === "범용") return `<span class="gift-kw-textbadge">ALL</span>`;
+  if (kw === "범용") return `<span class="gift-kw-all"><span class="gift-kw-textbadge">ALL</span><img class="gift-kw-faust" src="${UI_ICON_DATA.universalFaust}" width="${size}" height="${size}" alt="" style="object-fit:contain;"></span>`;
   const src = KEYWORD_ICON_DATA[kw];
   return src
     ? `<img src="${src}" width="${size}" height="${size}" alt="" style="object-fit:contain;">`
