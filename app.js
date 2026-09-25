@@ -5691,11 +5691,26 @@ const PHASE_NAME_RE = /(^|\s)\d+(페이즈|차전)$/;
 const PHASE_GROUP_KEYS = new Set(
   ENEMY_DATA.filter(e => e.group && PHASE_NAME_RE.test(e.name)).map(e => `${e.chapter}|${e.group}`)
 );
+// role:"sub"(소환수/동반 개체 등 하위 개체)가 있는 그룹: 같은 챕터·그룹의 메인 적과 하위 개체를 카드 하나로 묶는다.
+const SUB_GROUP_KEYS = new Set(
+  ENEMY_DATA.filter(e => e.group && e.role === "sub").map(e => `${e.chapter}|${e.group}`)
+);
+function enemyGroupKey(e){ return e.group ? `${e.chapter}|${e.group}` : null; }
 function enemyIdentity(e, idx){
   if (e.name === "???") return `__unique_${idx}`;
-  const groupKey = e.group ? `${e.chapter}|${e.group}` : null;
+  const groupKey = enemyGroupKey(e);
+  if (groupKey && SUB_GROUP_KEYS.has(groupKey)) return groupKey;
   if (PHASE_NAME_RE.test(e.name) || (groupKey && PHASE_GROUP_KEYS.has(groupKey))) return groupKey;
   return e.name;
+}
+// 카드/상세 탭에서 메인 적(들)을 앞에, 하위 개체를 뒤에 (각각 원래 순서 유지)
+function enemySortMainFirst(items){
+  return items.filter(it => it.e.role !== "sub").concat(items.filter(it => it.e.role === "sub"));
+}
+function enemyTabLabel(e, all){
+  if (e.role === "sub") return `하위 개체 - ${e.name}`;
+  const sameName = all.filter(x => x.name === e.name).length > 1;
+  return sameName && e.phase ? `${e.name} ${e.phase}` : e.name;
 }
 // 카드/상세창 제목으로 쓸 이름. "1페이즈"처럼 그 자체로는 의미가 없는 회차성
 // 이름이면 소속 그룹(보스 이름)을 대신 보여준다.
@@ -5707,15 +5722,28 @@ function enemyGroupLabel(e){
   return (e.group && e.group !== "목록") ? e.group : null;
 }
 function enemyCardHTML(group){
+  group = enemySortMainFirst(group);
   const e = group[0].e;
   const idxs = group.map(g => g.idx);
+  const subCount = group.filter(g => g.e.role === "sub").length;
+  const mainCount = group.length - subCount;
   const statRow = (e.hp != null) ? `<div class="enemy-stat-row">
       <span>HP ${escapeHTML(e.hp)}</span><span>속도 ${escapeHTML(e.speed || "?")}</span><span>방어 ${escapeHTML(e.defense || "?")}</span>
     </div>` : `<div class="enemy-stat-row enemy-stat-empty">스탯 정보 없음</div>`;
   const kwChips = (e.keywords || []).filter(k => k && k !== "-").map(k => `<span class="gift-tag">${escapeHTML(k)}</span>`).join("");
-  const roundBadge = group.length > 1 ? `<span class="gift-tag gift-tag-cost">${group.length}차전</span>` : "";
-  const img = group.find(g => g.e.image) && group.find(g => g.e.image).e.image;
+  const badges = [];
+  if (subCount > 0){
+    if (mainCount > 1) badges.push(`<span class="gift-tag gift-tag-cost">${mainCount}차전</span>`);
+    badges.push(`<span class="gift-tag gift-tag-cost">하위 개체 ${subCount}</span>`);
+  } else if (group.length > 1){
+    badges.push(`<span class="gift-tag gift-tag-cost">${group.length}차전</span>`);
+  }
+  const img = e.image || (group.find(g => g.e.image) && group.find(g => g.e.image).e.image);
   const groupLabel = enemyGroupLabel(e);
+  const isLoneSub = group.length === 1 && e.role === "sub";
+  const tagText = isLoneSub
+    ? `${e.chapter} · ${groupLabel || ""} 하위 개체`
+    : `${e.chapter}${groupLabel ? " · " + groupLabel : ""}`;
   return `
     <div class="card enemy-card" data-idxs="${idxs.join(",")}">
       ${img ? `<img class="card-banner enemy-card-banner" src="${img}" alt="">` : ""}
@@ -5723,9 +5751,9 @@ function enemyCardHTML(group){
         <div class="gift-card-head">
           <span class="gift-card-name">${escapeHTML(enemyDisplayName(e))}</span>
         </div>
-        <div class="enemy-card-tag">${escapeHTML(e.chapter)}${groupLabel ? " · " + escapeHTML(groupLabel) : ""}</div>
+        <div class="enemy-card-tag">${escapeHTML(tagText)}</div>
         ${statRow}
-        <div class="gift-card-foot">${roundBadge}${kwChips}</div>
+        <div class="gift-card-foot">${badges.join("")}${kwChips}</div>
       </div>
     </div>`;
 }
@@ -5734,9 +5762,29 @@ function renderEnemyGrid(){
   const filtered = ENEMY_DATA
     .map((e, idx) => ({e, idx}))
     .filter(({e}) => (q ? true : e.chapter === enemyCurrentChapter()) && enemyMatchesQuery(e, q));
+  // 검색 중: 메인 적이 검색어와 맞으면 그 그룹 전체(메인+하위 개체)를 한 카드로, 하위 개체만 맞으면
+  // 그 하위 개체만 따로 카드로 보여준다.
+  const mainHitKeys = new Set();
+  const loneSubIdx = new Set();
+  if (q){
+    filtered.forEach(({e}) => {
+      const k = enemyGroupKey(e);
+      if (k && SUB_GROUP_KEYS.has(k) && e.role !== "sub") mainHitKeys.add(k);
+    });
+    const have = new Set(filtered.map(it => it.idx));
+    ENEMY_DATA.forEach((e, idx) => {
+      const k = enemyGroupKey(e);
+      if (k && mainHitKeys.has(k) && !have.has(idx)) filtered.push({e, idx});
+    });
+    filtered.sort((a, b) => a.idx - b.idx);
+    filtered.forEach(({e, idx}) => {
+      const k = enemyGroupKey(e);
+      if (e.role === "sub" && k && SUB_GROUP_KEYS.has(k) && !mainHitKeys.has(k)) loneSubIdx.add(idx);
+    });
+  }
   const groupMap = new Map();
   filtered.forEach(item => {
-    const key = enemyIdentity(item.e, item.idx);
+    const key = loneSubIdx.has(item.idx) ? `__sub_${item.idx}` : enemyIdentity(item.e, item.idx);
     if (!groupMap.has(key)) groupMap.set(key, []);
     groupMap.get(key).push(item);
   });
@@ -5772,7 +5820,12 @@ function enemyDetailBodyHTML(e){
   const rows = [];
   if (e.image) rows.push(`<img class="enemy-detail-image" src="${e.image}" alt="">`);
   const groupLabel = enemyGroupLabel(e);
-  if (groupLabel) rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(groupLabel)}</span></div>`);
+  if (e.role === "sub"){
+    rows.push(`<div class="skill-tt-row"><span>소속</span><span>${escapeHTML(groupLabel || "")}${e.phase ? ` (${escapeHTML(e.phase)} 등장)` : ""}</span></div>`);
+  } else {
+    if (groupLabel) rows.push(`<div class="skill-tt-row"><span>분류</span><span>${escapeHTML(groupLabel)}</span></div>`);
+    if (e.phase) rows.push(`<div class="skill-tt-row"><span>페이즈</span><span>${escapeHTML(e.phase)}</span></div>`);
+  }
   if (e.hp != null){
     rows.push(`<div class="skill-tt-row"><span>HP</span><span>${escapeHTML(e.hp)}</span></div>`);
     rows.push(`<div class="skill-tt-row"><span>속도</span><span>${escapeHTML(e.speed || "?")}</span></div>`);
@@ -5819,7 +5872,8 @@ function renderEnemyDetailBody(){
   document.getElementById("enemyDetailBody").innerHTML = enemyDetailBodyHTML(e);
 }
 function openEnemyDetail(idxs){
-  const list = Array.isArray(idxs) ? idxs : [idxs];
+  let list = Array.isArray(idxs) ? idxs : [idxs];
+  list = enemySortMainFirst(list.map(idx => ({e: ENEMY_DATA[idx], idx}))).map(it => it.idx);
   const first = ENEMY_DATA[list[0]];
   if (!first) return;
   enemyDetailState = { idxs: list, round: 0 };
@@ -5827,10 +5881,11 @@ function openEnemyDetail(idxs){
   const roundTabsWrap = document.getElementById("enemyDetailRoundTabs");
   if (list.length > 1){
     roundTabsWrap.hidden = false;
-    const roundNames = list.map(idx => ENEMY_DATA[idx].name);
-    const allSameName = roundNames.every(n => n === roundNames[0]);
+    const all = list.map(idx => ENEMY_DATA[idx]);
+    let labels = all.map(e => enemyTabLabel(e, all));
+    if (new Set(labels).size !== labels.length) labels = labels.map((l, i) => `${i+1}차전`);
     roundTabsWrap.innerHTML = list.map((idx, i) =>
-      `<button type="button" class="view-tab" data-round="${i}" aria-pressed="${i===0}">${allSameName ? `${i+1}차전` : escapeHTML(roundNames[i])}</button>`
+      `<button type="button" class="view-tab" data-round="${i}" aria-pressed="${i===0}">${escapeHTML(labels[i])}</button>`
     ).join("");
     roundTabsWrap.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {

@@ -415,12 +415,13 @@
   .gift-link-chip:hover{ background:var(--surface-3, var(--surface-2)); border-color:var(--accent-strong); }
 
   /* ---------- 적 정보 ---------- */
-  .enemy-ch-tabs{
-    flex-wrap:wrap; width:auto;
+  .enemy-tabs-sticky{
     position:sticky; top:var(--header-h, 96px); z-index:8;
     background:var(--bg); box-shadow:var(--shadow);
     margin-bottom:10px; padding:4px 0;
   }
+  .enemy-tabs-sticky .enemy-ch-tabs{ flex-wrap:wrap; width:auto; margin-bottom:6px; }
+  .enemy-tabs-sticky .enemy-sub-tabs{ margin-bottom:0; }
   .enemy-card{ cursor:pointer; transition:border-color .12s; }
   .enemy-card-banner{
     object-fit:contain; object-position:center; background:var(--surface-2);
