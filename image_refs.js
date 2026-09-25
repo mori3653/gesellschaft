@@ -1543,6 +1543,7 @@ const IDENTITY_PORTRAIT_FULL_SYNCED_DATA = {
   "파우스트|LCE E.G.O::홍염살": "images/portraits_full_synced/59.webp",
   "파우스트|검지 수행자:【쪽지】": "images/portraits_full_synced/24.webp",
   "히스클리프|로보토미 E.G.O::여우비": "images/portraits_full_synced/134.webp",
+  "파우스트|거미집 약지 제자": "images/portraits_full_synced/14.webp",
 };
 
 const EGO_SKILL_ICON_DATA = {
