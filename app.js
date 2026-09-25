@@ -5709,8 +5709,10 @@ function enemySortMainFirst(items){
 }
 function enemyTabLabel(e, all){
   if (e.role === "sub") return `하위 개체 - ${e.name}`;
-  const sameName = all.filter(x => x.name === e.name).length > 1;
-  return sameName && e.phase ? `${e.name} ${e.phase}` : e.name;
+  const mains = all.filter(x => x.role !== "sub");
+  if (!e.phase || mains.length < 2) return e.name;
+  const sameName = mains.filter(x => x.name === e.name).length > 1;
+  return sameName ? `${e.name} ${e.phase}` : `${e.phase} - ${e.name}`;
 }
 // 카드/상세창 제목으로 쓸 이름. "1페이즈"처럼 그 자체로는 의미가 없는 회차성
 // 이름이면 소속 그룹(보스 이름)을 대신 보여준다.
